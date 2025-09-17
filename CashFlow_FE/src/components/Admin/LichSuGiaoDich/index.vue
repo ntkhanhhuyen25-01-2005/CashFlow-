@@ -95,7 +95,7 @@
       Chỉ hiển thị dữ liệu tổng hợp (ngày, loại, trạng thái, số lượng, tổng tiền). Không chứa thông tin cá nhân nhạy cảm.
     </div>
 
-    <!-- Modal xác nhận Đặt lại -->
+    <!-- Modal xác nhận Đặt lại
     <div class="modal fade" id="resetModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -113,8 +113,8 @@
             </button>
           </div>
         </div>
-      </div>
-    </div>
+      </div> -->
+    <!-- </div> -->
   </div>
 </template>
 

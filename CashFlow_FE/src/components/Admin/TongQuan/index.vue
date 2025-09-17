@@ -1,7 +1,7 @@
 <template>
   <div class="container-fluid py-3">
-    <div class="row g-3">
-      <div class="col-12 col-xl-6">
+    <div class="row g-3 justify-content-center">
+      <div class="col-10">
         <div class="card h-100 shadow-sm">
           <div class="card-header bg-white d-flex align-items-center justify-content-between">
             <span>Theo dõi hoạt động tổng thể: Số giao dịch (realtime)</span>
@@ -13,7 +13,7 @@
         </div>
       </div>
 
-      <div class="col-12 col-xl-6">
+      <div class="col-10 ">
         <div class="card h-100 shadow-sm">
           <div class="card-header bg-white d-flex align-items-center justify-content-between">
             <span>Người dùng online (realtime)</span>

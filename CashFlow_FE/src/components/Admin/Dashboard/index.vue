@@ -97,11 +97,11 @@
           <div class="card-body">
             <div class="d-flex justify-content-between">
               <div class="text-muted">Đang đến</div>
-              <div class="fw-bold">0</div>
+              <div class="fw-bold">{{ recentIncomingCount }}</div>
             </div>
             <div class="d-flex justify-content-between mt-1">
               <div class="text-muted">Đã chi</div>
-              <div class="fw-bold">0</div>
+              <div class="fw-bold">{{ recentSpentCount }}</div>
             </div>
           </div>
         </div>
@@ -112,8 +112,8 @@
           <div class="card-header bg-white">Dòng tiền</div>
           <div class="card-body">
             <div class="d-flex justify-content-between">
-              <div class="text-muted">0 giao dịch</div>
-              <div class="fw-bold">0</div>
+              <div class="text-muted">{{ cashflowCount }} giao dịch</div>
+              <div class="fw-bold">{{ cashflowAmount }}</div>
             </div>
           </div>
         </div>
@@ -123,11 +123,11 @@
         <div class="card h-100 shadow-sm">
           <div class="card-header bg-white d-flex justify-content-between align-items-center">
             <span>Mục tiêu ngân sách</span>
-            <span class="badge bg-soft-success text-success">Tỷ lệ thành công hiện tại 0%</span>
+            <span class="badge bg-soft-success text-success">Tỷ lệ thành công hiện tại {{ budgetSuccessRate }}%</span>
           </div>
           <div class="card-body">
             <div class="small text-muted">Mục tiêu đang hoạt động</div>
-            <div class="fw-bold">0 / 0</div>
+            <div class="fw-bold">{{ budgetActive }} / {{ budgetTotal }}</div>
           </div>
         </div>
       </div>
@@ -136,11 +136,11 @@
         <div class="card h-100 shadow-sm">
           <div class="card-header bg-white d-flex justify-content-between align-items-center">
             <span>Kế hoạch chi tiêu</span>
-            <span class="badge bg-soft-warning text-warning">Tỷ lệ thành công hiện tại 0%</span>
+            <span class="badge bg-soft-warning text-warning">Tỷ lệ thành công hiện tại {{ planSuccessRate }}%</span>
           </div>
           <div class="card-body">
             <div class="small text-muted">Kế hoạch đang hoạt động</div>
-            <div class="fw-bold">0 / 0</div>
+            <div class="fw-bold">{{ planActive }} / {{ planTotal }}</div>
           </div>
         </div>
       </div>
@@ -154,14 +154,32 @@ export default {
   name: "DashboardOverview",
   data() {
     return {
-      usersCount: 0,
-      newUsersThisMonth: 0,
-      transactionsCount: 0,
-      transactionsToday: 0,
-      errorAlerts: 0,
-      criticalAlerts: 0,
-      quickStatValue: '0%',
+      usersCount: 12840,
+      newUsersThisMonth: 312,
+      transactionsCount: 78542,
+      transactionsToday: 129,
+      errorAlerts: 14,
+      criticalAlerts: 2,
+      quickStatValue: '87%',
       quickStatLabel: 'Tỷ lệ hoàn tất',
+
+      // Widget: Giao dịch gần đây
+      recentIncomingCount: 26,
+      recentSpentCount: 19,
+
+      // Widget: Dòng tiền
+      cashflowCount: 45,
+      cashflowAmount: '₫ 128,450,000',
+
+      // Widget: Mục tiêu ngân sách
+      budgetSuccessRate: 72,
+      budgetActive: 5,
+      budgetTotal: 7,
+
+      // Widget: Kế hoạch chi tiêu
+      planSuccessRate: 64,
+      planActive: 7,
+      planTotal: 11,
     }
   }
 }

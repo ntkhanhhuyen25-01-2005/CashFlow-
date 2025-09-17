@@ -1,6 +1,7 @@
 <template>
   <div class="container-fluid py-3">
     <div class="card shadow-sm">
+      <!-- Header: Tìm kiếm + Filter + Hành động -->
       <div class="card-header bg-white d-flex flex-wrap gap-2 align-items-end">
         <div>
           <label class="form-label mb-1">Tìm kiếm</label>
@@ -10,18 +11,18 @@
           <label class="form-label mb-1">Trạng thái</label>
           <select class="form-select" v-model="statusFilter">
             <option value="">Tất cả</option>
-            <option value="pending">Chờ xác minh</option>
             <option value="active">Đang hoạt động</option>
             <option value="locked">Đã khóa</option>
           </select>
         </div>
         <div class="ms-auto d-flex gap-2">
-          <button class="btn btn-primary" @click="openConfirm('verifySelected')" :disabled="selectedIds.length===0">Xác minh</button>
+          <button class="btn btn-danger" @click="openConfirm('deleteSelected')" :disabled="selectedIds.length===0">Xóa</button>
           <button class="btn btn-warning" @click="openConfirm('lockSelected')" :disabled="selectedIds.length===0">Khóa</button>
           <button class="btn btn-success" @click="openConfirm('unlockSelected')" :disabled="selectedIds.length===0">Mở khóa</button>
         </div>
       </div>
 
+      <!-- Body: Table Users -->
       <div class="card-body">
         <div class="table-responsive">
           <table class="table align-middle">
@@ -43,12 +44,11 @@
                 <td><input type="checkbox" :value="u.id" v-model="selectedIds" /></td>
                 <td>{{ u.name }}</td>
                 <td>{{ u.email }}</td>
-                <td>
-                  <span :class="['badge', statusBadge(u.status)]">{{ statusLabel(u.status) }}</span>
-                </td>
+                <td><span :class="['badge', statusBadge(u.status)]">{{ statusLabel(u.status) }}</span></td>
                 <td>{{ formatDate(u.createdAt) }}</td>
                 <td class="text-end">
-                  <button class="btn btn-sm btn-outline-primary me-1" @click="openConfirm('verify', u)" :disabled="u.status!=='pending'">Xác minh</button>
+                  <button class="btn btn-sm btn-outline-primary me-1" @click="openUpdate(u)">Cập nhật</button>
+                  <button class="btn btn-sm btn-outline-danger me-1" @click="openConfirm('delete', u)">Xóa</button>
                   <button class="btn btn-sm btn-outline-warning me-1" @click="openConfirm('lock', u)" :disabled="u.status==='locked'">Khóa</button>
                   <button class="btn btn-sm btn-outline-success me-1" @click="openConfirm('unlock', u)" :disabled="u.status!=='locked'">Mở khóa</button>
                   <button class="btn btn-sm btn-outline-secondary" @click="openComplaints(u)">Khiếu nại</button>
@@ -56,6 +56,23 @@
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <!-- Form Cập nhật inline -->
+        <div v-if="pendingUser" class="mt-3 border p-3 rounded bg-light">
+          <h6>Cập nhật thông tin user</h6>
+          <div class="mb-2">
+            <label class="form-label">Tên</label>
+            <input v-model="pendingUser.name" class="form-control" />
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Email</label>
+            <input v-model="pendingUser.email" class="form-control" />
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-primary" @click="saveUpdate">Lưu</button>
+            <button class="btn btn-secondary" @click="cancelUpdate">Hủy</button>
+          </div>
         </div>
 
         <!-- Khiếu nại -->
@@ -106,7 +123,6 @@
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -119,15 +135,13 @@ export default {
       statusFilter: "",
       selectedIds: [],
       users: [
-        { id: 1, name: "Nguyễn Văn A", email: "a@example.com", status: "pending", createdAt: "2025-09-01" },
+        { id: 1, name: "Nguyễn Văn A", email: "a@example.com", status: "active", createdAt: "2025-09-01" },
         { id: 2, name: "Trần Thị B", email: "b@example.com", status: "active", createdAt: "2025-09-02" },
         { id: 3, name: "Lê Văn C", email: "c@example.com", status: "locked", createdAt: "2025-09-03" },
         { id: 4, name: "Phạm Thị D", email: "d@example.com", status: "active", createdAt: "2025-09-04" },
       ],
       activeComplaintsUser: null,
       complaints: [],
-
-      // modal
       pendingAction: null,
       pendingUser: null,
       modalMessage: "",
@@ -148,89 +162,77 @@ export default {
     }
   },
   methods: {
-    statusLabel(s) {
-      return s === 'pending' ? 'Chờ xác minh' : s === 'active' ? 'Đang hoạt động' : 'Đã khóa';
+    statusLabel(s) { return s==='active' ? 'Đang hoạt động' : 'Đã khóa'; },
+    statusBadge(s) { return s==='active' ? 'bg-soft-success text-success' : 'bg-soft-danger text-danger'; },
+    formatDate(str) { const [y,m,d] = str.split('-'); return `${d}/${m}/${y}`; },
+    toggleSelectAll(e) { this.selectedIds = e.target.checked ? this.filteredUsers.map(u=>u.id) : []; },
+    
+    // ==== Cập nhật user ====
+    openUpdate(user) {
+      this.pendingUser = { ...user }; // copy để edit
     },
-    statusBadge(s) {
-      return s === 'pending' ? 'bg-soft-warning text-warning' : s === 'active' ? 'bg-soft-success text-success' : 'bg-soft-danger text-danger';
+    saveUpdate() {
+      const index = this.users.findIndex(u => u.id === this.pendingUser.id);
+      if (index !== -1) this.users.splice(index, 1, { ...this.pendingUser });
+      this.pendingUser = null;
     },
-    formatDate(str) {
-      const [y, m, d] = str.split('-');
-      return `${d}/${m}/${y}`;
-    },
-    toggleSelectAll(e) {
-      if (e.target.checked) {
-        this.selectedIds = this.filteredUsers.map(u => u.id);
-      } else {
-        this.selectedIds = [];
-      }
+    cancelUpdate() { this.pendingUser = null; },
+
+    // ==== Khiếu nại ====
+    openComplaints(user) {
+      this.activeComplaintsUser = user;
+      this.complaints = [
+        { id: 101, title: 'Không đăng nhập được', status: 'open', createdAt: '2025-09-05 10:12' },
+        { id: 102, title: 'Lỗi thanh toán', status: 'in_progress', createdAt: '2025-09-06 14:20' },
+      ];
     },
 
-    // mở modal xác nhận
-    openConfirm(action, user = null) {
+    // ==== Xác nhận modal ====
+    openConfirm(action, user=null) {
       this.pendingAction = action;
       this.pendingUser = user;
-      if (action === "verify" || action === "verifySelected") this.modalMessage = "Bạn có chắc chắn muốn xác minh?";
-      if (action === "lock" || action === "lockSelected") this.modalMessage = "Bạn có chắc chắn muốn khóa?";
-      if (action === "unlock" || action === "unlockSelected") this.modalMessage = "Bạn có chắc chắn muốn mở khóa?";
+      if (action==='delete' || action==='deleteSelected') this.modalMessage="Bạn có chắc chắn muốn xóa?";
+      if (action==='lock' || action==='lockSelected') this.modalMessage="Bạn có chắc chắn muốn khóa?";
+      if (action==='unlock' || action==='unlockSelected') this.modalMessage="Bạn có chắc chắn muốn mở khóa?";
       const modal = new bootstrap.Modal(document.getElementById("confirmModal"));
       modal.show();
     },
-
     confirmAction() {
       const modalEl = document.getElementById("confirmModal");
-      const modal = bootstrap.Modal.getInstance(modalEl);
-      modal.hide();
+      bootstrap.Modal.getInstance(modalEl)?.hide();
 
-      if (this.pendingAction === "verify" && this.pendingUser) this.verify(this.pendingUser);
-      if (this.pendingAction === "lock" && this.pendingUser) this.lock(this.pendingUser);
-      if (this.pendingAction === "unlock" && this.pendingUser) this.unlock(this.pendingUser);
-
-      if (this.pendingAction === "verifySelected") this.verifySelected();
-      if (this.pendingAction === "lockSelected") this.lockSelected();
-      if (this.pendingAction === "unlockSelected") this.unlockSelected();
+      if (this.pendingAction==='delete' && this.pendingUser) this.deleteUser(this.pendingUser);
+      if (this.pendingAction==='lock' && this.pendingUser) this.lock(this.pendingUser);
+      if (this.pendingAction==='unlock' && this.pendingUser) this.unlock(this.pendingUser);
+      if (this.pendingAction==='deleteSelected') this.deleteSelected();
+      if (this.pendingAction==='lockSelected') this.lockSelected();
+      if (this.pendingAction==='unlockSelected') this.unlockSelected();
 
       this.pendingAction = null;
       this.pendingUser = null;
     },
 
-    verify(user) {
-      if (user.status === 'pending') user.status = 'active';
+    deleteUser(user) {
+      const id = user.id;
+      this.users = this.users.filter(u => u.id!==id);
+      this.selectedIds = this.selectedIds.filter(sid=>sid!==id);
+      if (this.activeComplaintsUser?.id===id) { this.activeComplaintsUser=null; this.complaints=[]; }
     },
-    lock(user) {
-      user.status = 'locked';
+    deleteSelected() {
+      const toDelete = new Set(this.selectedIds);
+      this.users = this.users.filter(u=>!toDelete.has(u.id));
+      this.selectedIds=[];
+      if (this.activeComplaintsUser && toDelete.has(this.activeComplaintsUser.id)) { this.activeComplaintsUser=null; this.complaints=[]; }
     },
-    unlock(user) {
-      user.status = 'active';
-    },
-    verifySelected() {
-      this.users.forEach(u => { if (this.selectedIds.includes(u.id) && u.status === 'pending') u.status = 'active'; });
-      this.selectedIds = [];
-    },
-    lockSelected() {
-      this.users.forEach(u => { if (this.selectedIds.includes(u.id)) u.status = 'locked'; });
-      this.selectedIds = [];
-    },
-    unlockSelected() {
-      this.users.forEach(u => { if (this.selectedIds.includes(u.id) && u.status === 'locked') u.status = 'active'; });
-      this.selectedIds = [];
-    },
-
-    openComplaints(user) {
-      this.activeComplaintsUser = user;
-      // Mock khiếu nại
-      this.complaints = [
-        { id: 101, title: 'Không đăng nhập được', status: 'open', createdAt: '2025-09-05 10:12' },
-        { id: 102, title: 'Lỗi thanh toán', status: 'in_progress', createdAt: '2025-09-06 14:20' },
-      ];
-    }
+    lock(user){ user.status='locked'; },
+    unlock(user){ user.status='active'; },
+    lockSelected(){ this.users.forEach(u=>{ if(this.selectedIds.includes(u.id)) u.status='locked'; }); this.selectedIds=[]; },
+    unlockSelected(){ this.users.forEach(u=>{ if(this.selectedIds.includes(u.id) && u.status==='locked') u.status='active'; }); this.selectedIds=[]; },
   }
 }
 </script>
 
 <style>
-.badge.bg-soft-primary { background-color: rgba(13,110,253,.12); }
 .badge.bg-soft-success { background-color: rgba(25,135,84,.12); }
 .badge.bg-soft-danger  { background-color: rgba(220,53,69,.12); }
-.badge.bg-soft-warning { background-color: rgba(255,193,7,.15); }
 </style>
