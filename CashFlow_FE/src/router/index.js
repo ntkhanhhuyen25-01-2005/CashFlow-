@@ -92,6 +92,19 @@ const routes = [
     component: () => import("../components/Client/Register/index.vue"),
     meta: { layout: "blank" },
   },
+  {
+    path: "/admin",
+    redirect: "/admin/Dashboard",
+  },
+  {
+    path: "/client",
+    redirect: "/client/trangchu",
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    component: () => import("../components/Client/TrangChu/index.vue"), // hoặc tạo trang 404 riêng
+    meta: { layout: "blank" },
+  },
 ]
 
 const router = createRouter({
