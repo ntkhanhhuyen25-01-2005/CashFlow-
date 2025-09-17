@@ -16,9 +16,9 @@
           </select>
         </div>
         <div class="ms-auto d-flex gap-2">
-          <button class="btn btn-primary" @click="verifySelected" :disabled="selectedIds.length===0">Xác minh</button>
-          <button class="btn btn-warning" @click="lockSelected" :disabled="selectedIds.length===0">Khóa</button>
-          <button class="btn btn-success" @click="unlockSelected" :disabled="selectedIds.length===0">Mở khóa</button>
+          <button class="btn btn-primary" @click="openConfirm('verifySelected')" :disabled="selectedIds.length===0">Xác minh</button>
+          <button class="btn btn-warning" @click="openConfirm('lockSelected')" :disabled="selectedIds.length===0">Khóa</button>
+          <button class="btn btn-success" @click="openConfirm('unlockSelected')" :disabled="selectedIds.length===0">Mở khóa</button>
         </div>
       </div>
 
@@ -48,9 +48,9 @@
                 </td>
                 <td>{{ formatDate(u.createdAt) }}</td>
                 <td class="text-end">
-                  <button class="btn btn-sm btn-outline-primary me-1" @click="verify(u)" :disabled="u.status!=='pending'">Xác minh</button>
-                  <button class="btn btn-sm btn-outline-warning me-1" @click="lock(u)" :disabled="u.status==='locked'">Khóa</button>
-                  <button class="btn btn-sm btn-outline-success me-1" @click="unlock(u)" :disabled="u.status!=='locked'">Mở khóa</button>
+                  <button class="btn btn-sm btn-outline-primary me-1" @click="openConfirm('verify', u)" :disabled="u.status!=='pending'">Xác minh</button>
+                  <button class="btn btn-sm btn-outline-warning me-1" @click="openConfirm('lock', u)" :disabled="u.status==='locked'">Khóa</button>
+                  <button class="btn btn-sm btn-outline-success me-1" @click="openConfirm('unlock', u)" :disabled="u.status!=='locked'">Mở khóa</button>
                   <button class="btn btn-sm btn-outline-secondary" @click="openComplaints(u)">Khiếu nại</button>
                 </td>
               </tr>
@@ -58,6 +58,7 @@
           </table>
         </div>
 
+        <!-- Khiếu nại -->
         <div class="mt-3">
           <h6 class="mb-2">Khiếu nại của user</h6>
           <div v-if="activeComplaintsUser" class="border rounded p-3">
@@ -86,6 +87,26 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal xác nhận -->
+    <div class="modal fade" id="confirmModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Xác nhận</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p>{{ modalMessage }}</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button type="button" class="btn btn-primary" @click="confirmAction">Đồng ý</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -105,6 +126,11 @@ export default {
       ],
       activeComplaintsUser: null,
       complaints: [],
+
+      // modal
+      pendingAction: null,
+      pendingUser: null,
+      modalMessage: "",
     }
   },
   computed: {
@@ -139,6 +165,35 @@ export default {
         this.selectedIds = [];
       }
     },
+
+    // mở modal xác nhận
+    openConfirm(action, user = null) {
+      this.pendingAction = action;
+      this.pendingUser = user;
+      if (action === "verify" || action === "verifySelected") this.modalMessage = "Bạn có chắc chắn muốn xác minh?";
+      if (action === "lock" || action === "lockSelected") this.modalMessage = "Bạn có chắc chắn muốn khóa?";
+      if (action === "unlock" || action === "unlockSelected") this.modalMessage = "Bạn có chắc chắn muốn mở khóa?";
+      const modal = new bootstrap.Modal(document.getElementById("confirmModal"));
+      modal.show();
+    },
+
+    confirmAction() {
+      const modalEl = document.getElementById("confirmModal");
+      const modal = bootstrap.Modal.getInstance(modalEl);
+      modal.hide();
+
+      if (this.pendingAction === "verify" && this.pendingUser) this.verify(this.pendingUser);
+      if (this.pendingAction === "lock" && this.pendingUser) this.lock(this.pendingUser);
+      if (this.pendingAction === "unlock" && this.pendingUser) this.unlock(this.pendingUser);
+
+      if (this.pendingAction === "verifySelected") this.verifySelected();
+      if (this.pendingAction === "lockSelected") this.lockSelected();
+      if (this.pendingAction === "unlockSelected") this.unlockSelected();
+
+      this.pendingAction = null;
+      this.pendingUser = null;
+    },
+
     verify(user) {
       if (user.status === 'pending') user.status = 'active';
     },
@@ -160,9 +215,10 @@ export default {
       this.users.forEach(u => { if (this.selectedIds.includes(u.id) && u.status === 'locked') u.status = 'active'; });
       this.selectedIds = [];
     },
+
     openComplaints(user) {
       this.activeComplaintsUser = user;
-      // Mock khiếu nại; thay bằng API thực
+      // Mock khiếu nại
       this.complaints = [
         { id: 101, title: 'Không đăng nhập được', status: 'open', createdAt: '2025-09-05 10:12' },
         { id: 102, title: 'Lỗi thanh toán', status: 'in_progress', createdAt: '2025-09-06 14:20' },
@@ -178,4 +234,3 @@ export default {
 .badge.bg-soft-danger  { background-color: rgba(220,53,69,.12); }
 .badge.bg-soft-warning { background-color: rgba(255,193,7,.15); }
 </style>
-
