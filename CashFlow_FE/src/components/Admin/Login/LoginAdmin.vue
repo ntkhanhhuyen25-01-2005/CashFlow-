@@ -65,7 +65,7 @@ export default {
 	},
 	methods: {
 		dangNhap(){
-			// Cho phép đăng nhập nếu người dùng tự nhập admin / 123456
+		
 			if (this.thong_tin_dang_nhap.email === 'admin' && this.thong_tin_dang_nhap.password === '123456') {
 				this.$toast && this.$toast.success('Đăng nhập thành công (tài khoản mặc định)');
 				localStorage.setItem('key_admin', 'default-admin-token');
