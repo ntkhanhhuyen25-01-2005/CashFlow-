@@ -62,10 +62,34 @@
               <span class="ms-auto small text-muted">30 ngày qua</span>
             </div>
           </div>
-          <div class="card-body d-flex justify-content-center align-items-center min-h-280">
-            <div class="empty">
-              <div class="empty-icon">?</div>
-              <div class="text-muted">Không có dữ liệu sẵn</div>
+          <div class="card-body min-h-280">
+            <div class="row g-3">
+              <div class="col-12 col-md-5">
+                <div class="small text-muted mb-1">Tổng 30 ngày</div>
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="text-success">Thu</span>
+                  <span class="fw-bold">{{ formatCurrency(incomeTotal) }}</span>
+                </div>
+                <div class="progress mt-1" style="height:8px">
+                  <div class="progress-bar bg-success" role="progressbar" :style="{ width: incomeVsExpenseRate + '%' }"></div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                  <span class="text-danger">Chi</span>
+                  <span class="fw-bold">{{ formatCurrency(expenseTotal) }}</span>
+                </div>
+                <div class="progress mt-1" style="height:8px">
+                  <div class="progress-bar bg-danger" role="progressbar" :style="{ width: (100 - incomeVsExpenseRate) + '%' }"></div>
+                </div>
+              </div>
+              <div class="col-12 col-md-7">
+                <div class="small text-muted mb-1">Chuỗi 30 ngày</div>
+                <div class="sparkline">
+                  <div v-for="(v, i) in incomeSeries" :key="'inc-'+i" class="bar bar-inc" :style="{ height: Math.max(4, Math.round(v / (maxIncome || 1) * 100)) + '%' }" title="Thu"></div>
+                </div>
+                <div class="sparkline mt-1">
+                  <div v-for="(v, i) in expenseSeries" :key="'exp-'+i" class="bar bar-exp" :style="{ height: Math.max(4, Math.round(v / (maxExpense || 1) * 100)) + '%' }" title="Chi"></div>
+                </div>
+              </div>
             </div>
           </div>
           <div class="card-footer bg-white small text-muted">
@@ -79,10 +103,16 @@
           <div class="card-header bg-white">
             Phân phối tài khoản
           </div>
-          <div class="card-body d-flex justify-content-center align-items-center min-h-280">
-            <div class="empty">
-              <div class="empty-icon">?</div>
-              <div class="text-muted">Không có dữ liệu có sẵn</div>
+          <div class="card-body min-h-280">
+            <div class="small text-muted mb-2">Phân phối theo tài khoản</div>
+            <div v-for="(acc, idx) in accountDistribution" :key="idx" class="mb-2">
+              <div class="d-flex justify-content-between">
+                <div class="text-muted">{{ acc.label }}</div>
+                <div class="fw-semibold">{{ formatCurrency(acc.amount) }} ({{ acc.percent }}%)</div>
+              </div>
+              <div class="progress mt-1" style="height:8px">
+                <div class="progress-bar" role="progressbar" :style="{ width: acc.percent + '%', backgroundColor: acc.color }"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -180,6 +210,46 @@ export default {
       planSuccessRate: 64,
       planActive: 7,
       planTotal: 11,
+
+      // Thu/Chi 30 ngày
+      incomeSeries: [12_000_000, 8_500_000, 14_200_000, 10_800_000, 9_700_000, 16_400_000, 13_900_000, 11_300_000, 12_800_000, 15_200_000, 9_300_000, 10_100_000, 14_800_000, 12_600_000, 13_200_000, 9_900_000, 15_900_000, 16_200_000, 11_700_000, 10_400_000, 12_400_000, 13_600_000, 9_800_000, 14_100_000, 15_500_000, 12_900_000, 10_700_000, 11_900_000, 16_800_000, 14_300_000],
+      expenseSeries: [7_500_000, 6_200_000, 9_100_000, 8_400_000, 7_900_000, 10_700_000, 8_600_000, 7_300_000, 8_900_000, 9_800_000, 6_700_000, 7_800_000, 9_300_000, 8_100_000, 8_900_000, 6_400_000, 10_200_000, 9_600_000, 7_900_000, 6_800_000, 8_200_000, 9_100_000, 6_300_000, 8_700_000, 9_400_000, 7_600_000, 6_900_000, 7_400_000, 10_900_000, 8_800_000],
+
+      // Phân phối tài khoản (giả lập)
+      accountDistribution: [
+        { label: 'Ví tiền mặt', amount: 18_450_000, percent: 22, color: '#0d6efd' },
+        { label: 'Tài khoản ngân hàng', amount: 48_900_000, percent: 58, color: '#20c997' },
+        { label: 'Thẻ tín dụng', amount: 9_750_000, percent: 12, color: '#ffc107' },
+        { label: 'Ví điện tử', amount: 6_050_000, percent: 8, color: '#6f42c1' },
+      ],
+    }
+  },
+  computed: {
+    maxIncome() {
+      return Math.max(1, ...this.incomeSeries)
+    },
+    maxExpense() {
+      return Math.max(1, ...this.expenseSeries)
+    },
+    incomeTotal() {
+      return this.incomeSeries.reduce((a, b) => a + b, 0)
+    },
+    expenseTotal() {
+      return this.expenseSeries.reduce((a, b) => a + b, 0)
+    },
+    incomeVsExpenseRate() {
+      const total = this.incomeTotal + this.expenseTotal
+      if (!total) return 50
+      return Math.round((this.incomeTotal / total) * 100)
+    }
+  },
+  methods: {
+    formatCurrency(value) {
+      try {
+        return '₫ ' + Number(value).toLocaleString('vi-VN')
+      } catch (e) {
+        return '₫ ' + value
+      }
     }
   }
 }
@@ -208,4 +278,10 @@ export default {
 /* Nhẹ nhàng hơn một chút cho toàn trang */
 .dashboard .card{ border: 1px solid #edf0f3; }
 .dashboard .card-header{ border-bottom: 1px solid #f1f2f4; }
+
+/* Sparkline bars */
+.sparkline{ display:flex; align-items:flex-end; gap:4px; height:100px; }
+.sparkline .bar{ width:8px; border-radius:2px; background:#e9ecef; }
+.sparkline .bar-inc{ background:#198754; opacity:.9; }
+.sparkline .bar-exp{ background:#dc3545; opacity:.9; }
 </style>
