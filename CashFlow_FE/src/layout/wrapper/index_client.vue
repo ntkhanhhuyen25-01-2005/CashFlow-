@@ -1,16 +1,16 @@
 <template>
-    <div class="wrapper">
-        <div class="header-wrapper">
-            <TopClient></TopClient>
-            <MenuClient></MenuClient>
-        </div>
-        <div class="page-wrapper">
-            <div class="page-content">
-                <router-view></router-view>
-            </div>
-        </div>
-        <Bot></Bot>
+  <div class="wrapper">
+    <div class="header-wrapper">
+      <TopAdmin></TopAdmin>
+      <MenuClient></MenuClient>
     </div>
+    <div class="page-wrapper">
+      <div class="page-content">
+        <router-view></router-view>
+      </div>
+    </div>
+    <BotAdmin></BotAdmin>
+  </div>
 </template>
 <script>
 import "../../assets/js/bootstrap.bundle.min.js";
@@ -20,18 +20,21 @@ import "../../assets/plugins/metismenu/js/metisMenu.min.js";
 import "../../assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js";
 import "../../assets/js/index.js";
 import "../../assets/js/app.js";
-import TopClient from "../components/TopClient.vue";
+import TopAdmin from "../components/TopAdmin.vue";
 import MenuClient from "../components/MenuClient.vue";
-import Bot from "../components/BotAdmin.vue";
+import BotAdmin from "../components/BotAdmin.vue";
+
 export default {
-    name: "app",
-    components: {
-        TopClient, MenuClient, Bot
-    }
-}
+  name: "app",
+  components: {
+    TopAdmin,
+    MenuClient,
+    BotAdmin,
+  },
+};
 </script>
 <style>
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css');
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css");
 @import "../../assets/plugins/vectormap/jquery-jvectormap-2.0.2.css";
 @import "../../assets/plugins/simplebar/css/simplebar.css";
 @import "../../assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css";

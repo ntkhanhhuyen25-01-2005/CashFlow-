@@ -23,14 +23,6 @@
             </router-link>
           </li>
           <li class="nav-item">
-            <router-link to="/client/profile" class="nav-link">
-              <div class="parent-icon">
-                <i class="fa-solid fa-user"></i>
-              </div>
-              <div class="menu-title">Profile</div>
-            </router-link>
-          </li>
-          <li class="nav-item">
             <router-link to="/client/giaodich" class="nav-link">
               <div class="parent-icon">
                 <i class="fa-solid fa-arrows-rotate"></i>
@@ -80,17 +72,6 @@
           </li>
         </ul>
       </nav>
-    </div>
-
-    <div>
-      <li class="nav-item">
-        <a class="nav-link" href="/">
-          <div class="parent-icon">
-            <i class="fa-solid fa-right-to-bracket"></i>
-          </div>
-          <div class="menu-title">Đăng Xuất</div>
-        </a>
-      </li>
     </div>
   </div>
 </template>

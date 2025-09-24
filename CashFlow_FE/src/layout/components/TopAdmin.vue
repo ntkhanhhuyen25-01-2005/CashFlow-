@@ -1,7 +1,7 @@
 <template>
   <header>
     <div class="topbar d-flex align-items-center">
-      <nav class="navbar navbar-expand">
+      <nav class="navbar navbar-expand custom-topbar">
         <div class="topbar-logo-header">
           <div class="">
             <img
@@ -22,12 +22,10 @@
               class="form-control search-control"
               placeholder="Type to search..."
             />
-            <span
-              class="position-absolute top-50 search-show translate-middle-y"
+            <span class="position-absolute search-show"
               ><i class="bx bx-search"></i
             ></span>
-            <span
-              class="position-absolute top-50 search-close translate-middle-y"
+            <span class="position-absolute search-close"
               ><i class="bx bx-x"></i
             ></span>
           </div>
@@ -57,7 +55,15 @@
           </a>
           <ul class="dropdown-menu dropdown-menu-end">
             <!-- các menu bị comment -->
-
+            <li>
+              <a>
+                <router-link to="/client/profile" class="nav-link">
+                  <div class="menu-title ms-3">
+                    <i class="fa-solid fa-user"></i> Profile
+                  </div>
+                </router-link>
+              </a>
+            </li>
             <!-- Nút Logout -->
             <li>
               <a
@@ -110,4 +116,92 @@
 export default {};
 </script>
 
-<style></style>
+<style scoped>
+.custom-topbar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  border-radius: 0 0 15px 15px;
+  padding: 15px 20px;
+}
+
+.custom-topbar .logo-text {
+  color: white !important;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.custom-topbar .search-control {
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 25px;
+  padding: 12px 50px 12px 50px;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  position: relative;
+}
+
+.custom-topbar .search-control:focus {
+  background-color: white;
+  border-color: #fff;
+  box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.5);
+  outline: none;
+}
+
+.custom-topbar .search-show {
+  color: #667eea;
+  left: 20px; /* Căn phải hơn một chút */
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  pointer-events: none;
+  font-size: 16px;
+}
+
+.custom-topbar .search-close {
+  color: #667eea;
+  right: 20px; /* Căn phải hơn một chút */
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.custom-topbar .user-name {
+  color: white !important;
+  font-weight: 600;
+}
+
+.custom-topbar .user-img {
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+}
+
+.custom-topbar .dropdown-menu {
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  border: none;
+  margin-top: 10px;
+}
+
+.custom-topbar .dropdown-item {
+  padding: 12px 20px;
+  transition: all 0.3s ease;
+}
+
+.custom-topbar .dropdown-item:hover {
+  background-color: #f8f9fa;
+  color: #667eea;
+}
+
+.mobile-toggle-menu i {
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.mobile-toggle-menu i:hover {
+  transform: scale(1.1);
+}
+</style>
