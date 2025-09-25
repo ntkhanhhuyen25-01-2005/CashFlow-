@@ -1,88 +1,90 @@
 <template>
-	<div class="section-authentication-signin d-flex align-items-center justify-content-center my-5 my-lg-0">
-		<div class="container-fluid">
-			<div class="row row-cols-1 row-cols-lg-2 row-cols-xl-3">
-				<div class="col mx-auto">
-					<div class="card radius-10">
-						<div class="card-body">
-							<div class="border p-4 rounded">
-								<div class="text-center mb-4">
-									<img src="https://play-lh.googleusercontent.com/oIYzM27-Lax7Zkg4grAxxLYRQkxHrs1osx0Qbf-jADQNpv9400yo0qYcLzDn-Qz2M8A" width="150" alt="" />
-									<h4 class="mt-3 font-weight-bold text-uppercase text-nowrap">ĐĂNG NHẬP ADMIN <span
-											class="text-primary">CashFLow</span></h4>
-								</div>
-								<div class="form-body">
-									<div class="row g-3">
-										<div class="col-12">
-											<label class="form-label">Email</label>
-											<div class="input-group">
-												<span class="input-group-text bg-transparent">
-													<i class="fa-solid fa-envelope"></i>
-												</span>
-												<input v-model="thong_tin_dang_nhap.email" type="email" class="form-control border-start-0"
-													placeholder="Email">
-											</div>
-										</div>
-										<div class="col-12">
-											<label class="form-label">Mật khẩu</label>
-											<div class="input-group">
-												<span class="input-group-text bg-transparent">
-													<i class="fa-solid fa-lock"></i>
-												</span>
-												<input v-model="thong_tin_dang_nhap.password" @keydown.enter="dangNhap()" type="password" class="form-control border-start-0"
-													placeholder="Mật khẩu">
-											</div>
-										</div>
-										<div class="col-12">
-											<div class="d-grid">
-												<button @click="dangNhap()" class="btn btn-primary">
-													<i class="fa-solid fa-right-to-bracket me-2"></i>
-													Đăng Nhập
-												</button>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+    <div class="login-wrapper">
+        <div class="section-authentication-signin d-flex align-items-center justify-content-center my-5 my-lg-0">
+            <div class="container-fluid">
+                <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-3">
+                    <div class="col mx-auto">
+                        <div class="mb-4 text-center">
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="border p-4 rounded">
+                                    <div class="text-center">
+                                        <h3 class="">Đăng nhập Admin</h3>
+                                    </div>
+                                    <div class="form-body">
+                                        <form class="row g-3">
+                                            <div class="col-12">
+                                                <label class="form-label">Email</label>
+                                                <input v-model="user.email" type="email" class="form-control"
+                                                    required />
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label">Mật khẩu</label>
+                                                <div class="input-group">
+                                                    <input v-model="user.password"
+                                                        :type="showPassword ? 'text' : 'password'"
+                                                        class="form-control border-end-0" required />
+                                                    <span class="input-group-text bg-transparent"
+                                                        @click="showPassword = !showPassword">
+                                                        <i class="bx" :class="showPassword ? 'bx-hide' : 'bx-show'"></i>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="d-grid">
+                                                    <button v-on:click="DangNhap()" type="button"
+                                                        class="btn btn-primary">
+                                                        Đăng nhập
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script>
-import axios from 'axios'
+import baseRequestAdmin from '../../../core/baseRequestAdmin.js';
+import { createToaster } from "@meforma/vue-toaster";
+const toaster = createToaster({ position: "top-right" });
 export default {
-	data() {
-		return {
-			thong_tin_dang_nhap : {
-				email: '',
-				password: ''
-			}
-		}
-	},
-	methods: {
-		dangNhap(){
-			if (this.thong_tin_dang_nhap.email === 'admin' && this.thong_tin_dang_nhap.password === '123456') {
-				this.$toast && this.$toast.success('Đăng nhập thành công (tài khoản mặc định)');
-				localStorage.setItem('key_admin', 'default-admin-token');
-				this.$router.push('/admin/Dashboard');
-				return;
-			}
-
-			axios.post('http://127.0.0.1:8000/api/admin/dang-nhap', this.thong_tin_dang_nhap)
-				.then((res) => {
-					if (res.data.status) {
-						this.$toast && this.$toast.success(res.data.message);
-						localStorage.setItem('key_admin', res.data.token)
-						this.$router.push('/admin/Dashboard')
-					} else {
-						this.$toast && this.$toast.error(res.data.message);
-					}
-				});
-		}
-	}
+    data() {
+        return {
+            user: {
+                email: '',
+                password: ''
+            },
+            showPassword: false,
+        }
+    },
+    methods: {
+        DangNhap() {
+            baseRequestAdmin.post('admin/login', this.user)
+                .then((res) => {
+                    if (res.data.status) {
+                        toaster.success(res.data.message)
+                        this.user = {};
+                        localStorage.setItem('token_admin',res.data.token);
+                        this.$router.push('/admin/profile');
+                    } else {
+                        toaster.error(res.data.message);
+                    }
+                })
+                .catch((err) => {
+                    const listErr = err.response.data.errors;
+                    Object.values(listErr).forEach((error) => {
+                            toaster.error(error[0]);
+                    });
+                });
+        }
+    }
 }
 </script>
