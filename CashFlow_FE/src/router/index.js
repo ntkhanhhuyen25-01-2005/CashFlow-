@@ -3,8 +3,8 @@ import { createRouter, createWebHistory } from "vue-router"; // cài vue-router:
 const routes = [
 
   {
-    path: '/admin/LoginAdmin',
-    component: () => import('../components/Admin/Login/LoginAdmin.vue'),
+    path: '/admin/login',
+    component: () => import('../components/Admin/Login/index.vue'),
     meta: { layout: "blank" },
   },
   {
