@@ -73,7 +73,7 @@ export default {
                         toaster.success(res.data.message)
                         this.user = {};
                         localStorage.setItem('token_admin',res.data.token);
-                        this.$router.push('/admin/profile');
+                        this.$router.push('/admin/Dashboard');
                     } else {
                         toaster.error(res.data.message);
                     }
